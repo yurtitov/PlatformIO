@@ -2,15 +2,24 @@
 #include <WiFiManager.h>
 #include <TimeManager.h>
 #include <ConfigManager.h>
+#include <PressureSensor.h>
+
+#define PRESSURE_SENSOR_ADDR 0x78
+#define I2C_SDA 8
+#define I2C_SCL 9
 
 ConfigData cfg;
 WiFi_Manager *wifi = nullptr;
 TimeManager *timeService = nullptr;
+PressureSensor *sensor = nullptr;
 
 void setup()
 {
   Serial.begin(115200);
   delay(2000);
+
+  sensor = new PressureSensor(PRESSURE_SENSOR_ADDR, I2C_SDA, I2C_SCL);
+  sensor->begin();
 
   if (ConfigManager::load(cfg))
   {
@@ -43,5 +52,23 @@ void loop()
       Serial.println("[System] Waiting for WiFi...");
     }
   }
-  delay(5000);
+
+  if (sensor != nullptr)
+  {
+    float p = sensor->readPressure();
+    PressureStatus st = sensor->getStatus(p);
+
+    // Красивый вывод в Serial
+    Serial.printf("[%s] Давление: %.2f Bar | Статус: %s\n",
+                  timeService ? timeService->getFormattedTime("%H:%M:%S").c_str() : "00:00:00",
+                  p,
+                  sensor->getStatusString(st).c_str());
+
+    if (wifi && wifi->isConnected())
+    {
+      // Здесь в будущем можно отправить данные в облако/Telegram
+    }
+  }
+
+  delay(100);
 }
