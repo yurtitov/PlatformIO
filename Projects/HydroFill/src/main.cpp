@@ -1,38 +1,47 @@
 #include <Arduino.h>
 #include <WiFiManager.h>
 #include <TimeManager.h>
+#include <ConfigManager.h>
 
-const char *WIFI_SSID = "some_ssid";
-const char *WIFI_PASS = "some_pass";
-const char *NTP_SERVER = "pool.ntp.org";
-const long GMT_OFFSET_SEC = 7200; // KLD (GMT+2)
-
-WiFi_Manager wifi(WIFI_SSID, WIFI_PASS);
-TimeManager timeService(NTP_SERVER, GMT_OFFSET_SEC, 0);
+ConfigData cfg;
+WiFi_Manager *wifi = nullptr;
+TimeManager *timeService = nullptr;
 
 void setup()
 {
   Serial.begin(115200);
   delay(2000);
-  wifi.connect();
-  timeService.begin();
+
+  if (ConfigManager::load(cfg))
+  {
+    WiFi_Manager wifi(cfg.ssid.c_str(), cfg.pass.c_str());
+    TimeManager timeService(cfg.ntp_server.c_str(), cfg.gmt_offset, 0);
+
+    wifi.connect();
+    timeService.begin();
+
+    Serial.println("[System] Ready with config from LittleFS");
+  }
+  else
+  {
+    Serial.println("[ERROR] Config load failed!");
+  }
 }
 
 void loop()
 {
-  if (wifi.isConnected())
+  if (wifi != nullptr && timeService != nullptr)
   {
-    struct tm timeinfo;
-    if (getLocalTime(&timeinfo))
+    if (wifi->isConnected())
     {
-      Serial.print("[DATA] " + timeService.getFormattedTime());
+      Serial.print("[DATA] " + timeService->getFormattedTime());
       Serial.print(" | ");
-      wifi.printSignalQuality();
+      wifi->printSignalQuality();
     }
-  }
-  else
-  {
-    Serial.println("[System] Waiting for WiFi...");
+    else
+    {
+      Serial.println("[System] Waiting for WiFi...");
+    }
   }
   delay(5000);
 }
