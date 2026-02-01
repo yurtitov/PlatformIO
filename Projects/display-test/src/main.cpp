@@ -6,14 +6,21 @@ U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/9, /* data=*/8, /* 
 
 int counter = 0;
 
+#define LED_PIN 17
+
 void setup()
 {
   // Wire.begin больше не нужен для Software I2C
   u8g2.begin();
+  
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
 }
 
 void loop()
 {
+  digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+
   u8g2.clearBuffer(); // Очистка памяти дисплея
 
   // Настройка шрифта
