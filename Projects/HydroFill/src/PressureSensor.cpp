@@ -1,46 +1,64 @@
 #include <PressureSensor.h>
 
-PressureSensor::PressureSensor(uint8_t addr, int sda, int scl) : _addr(addr), _sda(sda), _scl(scl) {}
+PressureSensor::PressureSensor(uint8_t addr, int sda, int scl, float alpha)
+    : _addr(addr), _sda(sda), _scl(scl), _alpha(alpha) {}
 
-void PressureSensor::begin() {
+void PressureSensor::begin()
+{
     Wire.begin(_sda, _scl);
 }
 
-float PressureSensor::readPressure()
+void PressureSensor::update()
 {
-    long raw_sum = 0;
-    int samples = 5;
+    // 1. Получаем "сырое" значение (можно без усреднения samples, фильтр сделает это лучше)
+    Wire.beginTransmission(_addr);
+    Wire.write(0xAC);
+    Wire.endTransmission();
+    delay(75);
 
-    for (int i = 0; i < samples; i++)
+    Wire.requestFrom(_addr, (uint8_t)3);
+    if (Wire.available() == 3)
     {
-        Wire.beginTransmission(_addr);
-        Wire.write(0xAC);
-        Wire.endTransmission();
-        delay(50);
+        Wire.read();
+        uint16_t raw = (Wire.read() << 8) | Wire.read();
 
-        Wire.requestFrom(_addr, (uint8_t)3);
-        if (Wire.available() == 3)
+        // 2. Пересчет в бары
+        float current_bar = ((float)(raw - RAW_ZERO) / RAW_RANGE) * MAX_BAR;
+        if (current_bar < 0)
+            current_bar = 0;
+
+        // 3. Экспоненциальный фильтр
+        if (_filteredPressure < 0)
         {
-            Wire.read(); // Skip status
-            uint8_t msb = Wire.read();
-            uint8_t lsb = Wire.read();
-            raw_sum += (msb << 8) | lsb;
+            // Первый замер после включения — просто сохраняем как есть
+            _filteredPressure = current_bar;
+        }
+        else
+        {
+            // Математика фильтра
+            // При (alpha = 0.2)(рекомендуется) : Если давление резко прыгнет с 1.0 до 2.0 бар,
+            // прибор покажет это не мгновенно, а плавно "доплывет" до 2.0 за несколько итераций.
+            // Это уберет случайные всплески от работы насоса или гидроударов.
+            // При (alpha = 0.8) : Фильтр почти не работает, реакция мгновенная,
+            // но значения будут "дрожать" в Serial.
+            _filteredPressure = (_alpha * current_bar) + ((1.0f - _alpha) * _filteredPressure);
         }
     }
-
-    float raw_avg = (float)raw_sum / samples;
-    float pressure_bar = ((raw_avg - RAW_ZERO) / RAW_RANGE) * MAX_BAR;
-
-    return (pressure_bar < 0) ? 0 : pressure_bar;
 }
 
-PressureStatus PressureSensor::getStatus(float bar)
+float PressureSensor::getLatestPressure()
 {
-    if (bar < 0.6)
+    return _filteredPressure;
+}
+
+PressureStatus PressureSensor::getStatus()
+{
+    float p = _filteredPressure;
+    if (p < 0.6)
         return EMPTY_SYSTEM;
-    if (bar < 1.2)
+    if (p < 1.2)
         return LOW_PRESSURE;
-    if (bar <= 2.2)
+    if (p <= 2.2)
         return NORMAL_PRESSURE;
     return HIGH_PRESSURE;
 }
@@ -50,14 +68,14 @@ String PressureSensor::getStatusString(PressureStatus status)
     switch (status)
     {
     case EMPTY_SYSTEM:
-        return "АВАРИЯ: ПУСТАЯ СИСТЕМА";
+        return "АВАРИЯ";
     case LOW_PRESSURE:
-        return "ПРЕДУПРЕЖДЕНИЕ: НИЗКОЕ ДАВЛЕНИЕ";
+        return "НИЗКОЕ";
     case NORMAL_PRESSURE:
         return "НОРМА";
     case HIGH_PRESSURE:
-        return "ВНИМАНИЕ: ВЫСОКОЕ ДАВЛЕНИЕ";
+        return "ВЫСОКОЕ";
     default:
-        return "ОШИБКА";
+        return "???";
     }
 }
