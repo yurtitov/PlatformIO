@@ -68,13 +68,13 @@ String PressureSensor::getStatusString(PressureStatus status)
     switch (status)
     {
     case EMPTY_SYSTEM:
-        return "АВАРИЯ";
+        return "ALARM: Low pressure!";
     case LOW_PRESSURE:
-        return "НИЗКОЕ";
+        return "LOW";
     case NORMAL_PRESSURE:
-        return "НОРМА";
+        return "NORMAL";
     case HIGH_PRESSURE:
-        return "ВЫСОКОЕ";
+        return "ALARM: High pressure!";
     default:
         return "???";
     }
