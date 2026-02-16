@@ -3,10 +3,7 @@
 #include <TimeManager.h>
 #include <ConfigManager.h>
 #include <PressureSensor.h>
-
-#include <Adafruit_GFX.h>
-#include <Adafruit_ST7735.h>
-#include <SPI.h>
+#include <Display_1_77_TFT_Manager.h>
 
 #define PRESSURE_SENSOR_ADDR 0x78
 #define I2C_SDA 8
@@ -19,22 +16,11 @@
 #define BUZZER_PIN 2
 #define SOLENOID_VALVE_PIN 1
 
-// DISPLAY_PIN_1_GND
-// DISPLAY_PIN_2_VCC
-#define DISPLAY_PIN_3_SCK 11
-#define DISPLAY_PIN_4_SDA 10
-#define DISPLAY_PIN_5_RES 7
-#define DISPLAY_PIN_6_RS 6
-#define DISPLAY_PIN_7_CS 5
-// DISPLAY_PIN_8_LEDA
-
 ConfigData cfg;
 WiFi_Manager *wifi = nullptr;
 TimeManager *timeService = nullptr;
 
 PressureSensor sensor(PRESSURE_SENSOR_ADDR, I2C_SDA, I2C_SCL, 0.2f);
-
-Adafruit_ST7735 display = Adafruit_ST7735(DISPLAY_PIN_7_CS, DISPLAY_PIN_6_RS, DISPLAY_PIN_4_SDA, DISPLAY_PIN_3_SCK, DISPLAY_PIN_5_RES);
 
 // Функция-обертка для задачи FreeRTOS
 void pressureTask(void *pvParameters)
@@ -48,10 +34,12 @@ void pressureTask(void *pvParameters)
   }
 }
 
-int counter = 0;
+Display_1_77_TFT_Manager display;
 
 void setup()
 {
+  display.begin();
+
   Serial.begin(115200);
   delay(2000);
 
@@ -84,20 +72,6 @@ void setup()
   //     NULL            // Хендл задачи
   // );
 
-  display.initR(INITR_BLACKTAB);
-  display.setRotation(1);
-  display.fillScreen(ST77XX_BLACK);
-
-  display.setCursor(10, 30);
-  display.setTextColor(ST77XX_GREEN);
-  display.setTextSize(3);
-  display.println("YTTY");
-
-  display.setCursor(10, 60);
-  display.setTextColor(ST77XX_WHITE);
-  display.setTextSize(2);
-  display.println("Hello World!");
-
   pinMode(LED_POWER_ON_PIN, OUTPUT);
   digitalWrite(LED_POWER_ON_PIN, LOW);
 
@@ -112,6 +86,8 @@ void setup()
 
   pinMode(SOLENOID_VALVE_PIN, OUTPUT);
   digitalWrite(SOLENOID_VALVE_PIN, LOW);
+
+  display.clean();
 }
 
 void loop()
@@ -132,13 +108,11 @@ void loop()
   digitalWrite(SOLENOID_VALVE_PIN, HIGH);
   delay(2000);
 
-  display.setCursor(10, 90);
-  display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-  display.setTextSize(2);
-  display.print("Counter ");
-  display.println(++counter);
-  
+  display.printInfo(50.5, 2.0);
+
   digitalWrite(SOLENOID_VALVE_PIN, LOW);
   digitalWrite(LED_SOLENOID_VALVE_OPEN_PIN, LOW);
   delay(10000);
+  
+  display.printAlarm("Low pressure");
 }
