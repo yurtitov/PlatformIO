@@ -1,7 +1,7 @@
 #include <PressureSensor.h>
 
-PressureSensor::PressureSensor(uint8_t addr, int sda, int scl, float alpha)
-    : _addr(addr), _sda(sda), _scl(scl), _alpha(alpha) {}
+PressureSensor::PressureSensor(float alpha)
+    : _addr(PRESSURE_SENSOR_ADDR), _sda(I2C_SDA), _scl(I2C_SCL), _alpha(alpha) {}
 
 void PressureSensor::begin()
 {
@@ -49,33 +49,4 @@ void PressureSensor::update()
 float PressureSensor::getLatestPressure()
 {
     return _filteredPressure;
-}
-
-PressureStatus PressureSensor::getStatus()
-{
-    float p = _filteredPressure;
-    if (p < 0.6)
-        return EMPTY_SYSTEM;
-    if (p < 1.2)
-        return LOW_PRESSURE;
-    if (p <= 2.2)
-        return NORMAL_PRESSURE;
-    return HIGH_PRESSURE;
-}
-
-String PressureSensor::getStatusString(PressureStatus status)
-{
-    switch (status)
-    {
-    case EMPTY_SYSTEM:
-        return "ALARM: Low pressure!";
-    case LOW_PRESSURE:
-        return "LOW";
-    case NORMAL_PRESSURE:
-        return "NORMAL";
-    case HIGH_PRESSURE:
-        return "ALARM: High pressure!";
-    default:
-        return "???";
-    }
 }

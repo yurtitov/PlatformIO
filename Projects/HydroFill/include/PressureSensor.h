@@ -1,19 +1,14 @@
 #pragma once
-#include <Arduino.h>
 #include <Wire.h>
 
-enum PressureStatus
-{
-    EMPTY_SYSTEM,
-    LOW_PRESSURE,
-    NORMAL_PRESSURE,
-    HIGH_PRESSURE
-};
+#define PRESSURE_SENSOR_ADDR 0x78
+#define I2C_SDA 8
+#define I2C_SCL 9
 
 class PressureSensor
 {
 public:
-    PressureSensor(uint8_t addr, int sda, int scl, float alpha = 0.2f); // alpha - коэффициент сглаживания
+    PressureSensor(float alpha = 0.2f); // alpha - коэффициент сглаживания
     void begin();
 
     // Этот метод будет вызываться внутри потока
@@ -21,8 +16,6 @@ public:
 
     // Эти методы для чтения из loop()
     float getLatestPressure();
-    PressureStatus getStatus();
-    String getStatusString(PressureStatus status);
 
 private:
     uint8_t _addr;
