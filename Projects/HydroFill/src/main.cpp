@@ -4,6 +4,7 @@
 #include <ConfigManager.h>
 #include <PressureSensor.h>
 #include <Display_1_77_TFT_Manager.h>
+#include <TemperatureSensor.h>
 
 #define LED_ERROR_PIN 39
 #define LED_POWER_ON_PIN 40
@@ -15,24 +16,29 @@
 ConfigData cfg;
 WiFi_Manager *wifi = nullptr;
 TimeManager *timeService = nullptr;
-
-PressureSensor sensor(0.2f);
+PressureSensor pressureSensor(0.2f);
+TemperatureSensor temperatureSensor;
 
 // Функция-обертка для задачи FreeRTOS
 void pressureTask(void *pvParameters)
 {
-  Serial.println("[Task] Pressure sensor task started on Core " + String(xPortGetCoreID()));
-
   while (true)
   {
-    sensor.update();                // Опрашиваем датчик (это занимает ~750мс из-за delay)
+    pressureSensor.update();                // Опрашиваем датчик (это занимает ~750мс из-за delay)
     vTaskDelay(pdMS_TO_TICKS(100)); // Небольшая пауза между циклами опроса
   }
 }
 
-Display_1_77_TFT_Manager display;
+void temperatureTask(void *pvParameters)
+{
+  while ( true)
+  {
+    temperatureSensor.update();
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+}
 
-int count = 1;
+Display_1_77_TFT_Manager display;
 
 void setup()
 {
@@ -41,23 +47,23 @@ void setup()
   Serial.begin(115200);
   delay(2000);
 
-  TimeManager timeService(cfg.ntp_server.c_str(), cfg.gmt_offset, 0);
-  timeService.begin();
+  // TimeManager timeService(cfg.ntp_server.c_str(), cfg.gmt_offset, 0);
+  // timeService.begin();
 
-  if (ConfigManager::load(cfg))
-  {
-    WiFi_Manager wifi(cfg.ssid.c_str(), cfg.pass.c_str());
+  // if (ConfigManager::load(cfg))
+  // {
+  //   WiFi_Manager wifi(cfg.ssid.c_str(), cfg.pass.c_str());
 
-    wifi.connect();
+  //   wifi.connect();
 
-    Serial.println("[System] Ready with config from LittleFS");
-  }
-  else
-  {
-    Serial.println("[ERROR] Config load failed!");
-  }
+  //   Serial.println("[System] Ready with config from LittleFS");
+  // }
+  // else
+  // {
+  //   Serial.println("[ERROR] Config load failed!");
+  // }
 
-  sensor.begin();
+  pressureSensor.begin();
   xTaskCreate(
       pressureTask,   // Функция задачи
       "PressureTask", // Имя задачи
@@ -65,6 +71,16 @@ void setup()
       NULL,           // Параметры
       1,              // Приоритет
       NULL            // Хендл задачи
+  );
+
+  temperatureSensor.begin();
+  xTaskCreate(
+    temperatureTask,
+    "TemperatureTask",
+    4096,
+    NULL,
+    1,
+    NULL
   );
 
   pinMode(LED_POWER_ON_PIN, OUTPUT);
@@ -87,8 +103,14 @@ void setup()
 
 void loop()
 {
-  float p = sensor.getLatestPressure();
-  String time = timeService->getFormattedTime("%H:%M");
+  float pressure = pressureSensor.getLatestPressure();
+
+  float temperature = temperatureSensor.getTemperature();
+  if (!temperatureSensor.isSensorConnected()) {
+    Serial.println("Error: Temperature sensor not found");
+  }
+
+  // String time = timeService->getFormattedTime("%H:%M");
 
   digitalWrite(LED_ERROR_PIN, HIGH);
 
@@ -96,7 +118,7 @@ void loop()
   // digitalWrite(LED_SOLENOID_VALVE_OPEN_PIN, HIGH);
   // digitalWrite(SOLENOID_VALVE_PIN, HIGH);
 
-  display.printInfo(count++, p);
+  display.printInfo(temperature, pressure);
 
   // digitalWrite(SOLENOID_VALVE_PIN, LOW);
   // digitalWrite(LED_SOLENOID_VALVE_OPEN_PIN, LOW);
