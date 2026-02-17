@@ -3788,6 +3788,12 @@
 		(uuid "cd14812e-2a19-41b6-89dc-3b288139d91b")
 	)
 	(junction
+		(at 85.09 87.63)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d4650baa-2245-4f69-8479-728cd61637c6")
+	)
+	(junction
 		(at 130.81 29.21)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3816,6 +3822,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "f5aa3944-c65c-4339-a122-82aab63803b4")
+	)
+	(junction
+		(at 88.9 85.09)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f84c124b-121b-44cf-846d-94e2a9374138")
 	)
 	(wire
 		(pts
@@ -3861,7 +3873,7 @@
 	)
 	(wire
 		(pts
-			(xy 69.85 85.09) (xy 93.98 85.09)
+			(xy 69.85 85.09) (xy 88.9 85.09)
 		)
 		(stroke
 			(width 0)
@@ -3970,6 +3982,16 @@
 			(type default)
 		)
 		(uuid "134a95ba-7edd-47e2-89a1-a2ed9b934b94")
+	)
+	(wire
+		(pts
+			(xy 88.9 80.01) (xy 88.9 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "14ebd8c6-5029-4f14-95c1-cff40fe3a11f")
 	)
 	(wire
 		(pts
@@ -4231,7 +4253,7 @@
 	)
 	(wire
 		(pts
-			(xy 69.85 87.63) (xy 92.71 87.63)
+			(xy 69.85 87.63) (xy 85.09 87.63)
 		)
 		(stroke
 			(width 0)
@@ -4375,6 +4397,16 @@
 	)
 	(wire
 		(pts
+			(xy 85.09 87.63) (xy 92.71 87.63)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5d9e3ed2-3ccb-4044-8424-44e76019edfc")
+	)
+	(wire
+		(pts
 			(xy 109.22 106.68) (xy 121.92 106.68)
 		)
 		(stroke
@@ -4415,6 +4447,16 @@
 			(color 0 0 194 1)
 		)
 		(uuid "6573fcc4-c50f-43e3-a0b4-05f2ad3b5b21")
+	)
+	(wire
+		(pts
+			(xy 85.09 80.01) (xy 88.9 80.01)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "66fe0e8a-cd4e-450d-bb42-d2270aea558b")
 	)
 	(wire
 		(pts
@@ -5286,6 +5328,16 @@
 			(type default)
 		)
 		(uuid "f8bcd48e-6363-462a-afa7-53c59f4427fe")
+	)
+	(wire
+		(pts
+			(xy 88.9 85.09) (xy 93.98 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f9c42d37-1f1a-4f7c-b3a7-3d873d8cd9f6")
 	)
 	(wire
 		(pts
@@ -7532,6 +7584,75 @@
 			(project "hydro-fill"
 				(path "/d3141547-f75e-4d8b-a0b1-7433a6d75615"
 					(reference "Q2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 85.09 83.82 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "dc5fe974-a383-4269-ad1e-9307cf6eeaae")
+		(property "Reference" "R10"
+			(at 80.264 79.756 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "4,7k"
+			(at 79.502 82.042 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal"
+			(at 86.868 83.82 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 85.09 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 85.09 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "f606e709-da5e-402c-b106-53956ea0d152")
+		)
+		(pin "1"
+			(uuid "0587d14b-b0c9-4f9f-ac1c-92f48d5b17b2")
+		)
+		(instances
+			(project "hydro-fill"
+				(path "/d3141547-f75e-4d8b-a0b1-7433a6d75615"
+					(reference "R10")
 					(unit 1)
 				)
 			)
