@@ -5,10 +5,7 @@
 #include <PressureSensor.h>
 #include <Display_1_77_TFT_Manager.h>
 #include <TemperatureSensor.h>
-
-#define LED_ERROR_PIN 39
-#define LED_POWER_ON_PIN 40
-#define LED_SOLENOID_VALVE_OPEN_PIN 38
+#include <LEDSignalManager.h>
 
 #define BUZZER_PIN 2
 #define SOLENOID_VALVE_PIN 1
@@ -18,6 +15,7 @@ WiFi_Manager *wifi = nullptr;
 TimeManager *timeService = nullptr;
 PressureSensor pressureSensor(0.2f);
 TemperatureSensor temperatureSensor;
+LEDSignalManager ledSignal;
 
 // Функция-обертка для задачи FreeRTOS
 void pressureTask(void *pvParameters)
@@ -83,15 +81,6 @@ void setup()
     NULL
   );
 
-  pinMode(LED_POWER_ON_PIN, OUTPUT);
-  digitalWrite(LED_POWER_ON_PIN, LOW);
-
-  pinMode(LED_ERROR_PIN, OUTPUT);
-  digitalWrite(LED_ERROR_PIN, LOW);
-
-  pinMode(LED_SOLENOID_VALVE_OPEN_PIN, OUTPUT);
-  digitalWrite(LED_SOLENOID_VALVE_OPEN_PIN, LOW);
-
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);
 
@@ -99,6 +88,9 @@ void setup()
   digitalWrite(SOLENOID_VALVE_PIN, LOW);
 
   display.clean();
+  
+  ledSignal.begin();
+  ledSignal.showDemo();
 }
 
 void loop()
@@ -112,16 +104,11 @@ void loop()
 
   // String time = timeService->getFormattedTime("%H:%M");
 
-  digitalWrite(LED_ERROR_PIN, HIGH);
-
-  // digitalWrite(LED_POWER_ON_PIN, HIGH);
-  // digitalWrite(LED_SOLENOID_VALVE_OPEN_PIN, HIGH);
-  // digitalWrite(SOLENOID_VALVE_PIN, HIGH);
-
-  display.printInfo(temperature, pressure);
-
-  // digitalWrite(SOLENOID_VALVE_PIN, LOW);
-  // digitalWrite(LED_SOLENOID_VALVE_OPEN_PIN, LOW);
-  delay(100);
+  ledSignal.showMonitoring();
+  delay(1000);
+  ledSignal.showAlarm();
+  delay(1000);
+  ledSignal.showRefilling();
+  delay(1000);
   
 }
