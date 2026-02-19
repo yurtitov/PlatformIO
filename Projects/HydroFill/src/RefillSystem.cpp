@@ -12,8 +12,6 @@ RefillSystem::RefillSystem()
 
 void RefillSystem::begin()
 {
-    display.begin();
-
     pressureSensor.begin();
     xTaskCreate(
         pressureTask,   // Функция задачи
@@ -34,39 +32,139 @@ void RefillSystem::begin()
         NULL
     );
 
+    display.begin();
     ledSignal.begin();
-    ledSignal.showDemo();
-
     solenoidValve.begin();
     buzzer.begin();
-
-    display.clean();
 }
 
 void RefillSystem::update()
 {
-        // TODO
+    unsigned long now = millis();
+
+    switch (_currentState) {
+        case State::INIT:
+            handleInit();
+            break;
+        case State::MONITORING:
+            handleMonitoring();
+            break;
+        case State::REFILLING:
+            handleRefilling();
+            break;
+        case State::ALARM:
+            handleAlarm();
+            break;
+        case State::MANUAL:
+            handleManual();
+            break;
+        default:
+            break;
+    }
 }
     
+void RefillSystem::handleInit()
+{
+    // get data
+    float pressure = pressureSensor.getLatestPressure();
+    float temperature = temperatureSensor.getTemperature();
+
+    // Solenoid valve
+    solenoidValve.off();
+
+    // Buzzer
+    buzzer.off();
+    
+    // LedSignal
+    ledSignal.showDemo();
+
+    // Display
+    display.printDemo();
+    display.clean();
+
+    // action
+    if (isNormalPressure(pressure)) {
+        transitionTo(State::MONITORING);
+    } else {
+        transitionTo(State::ALARM);
+    }
+}
 
 void RefillSystem::handleMonitoring()
 {
-        // TODO
+    // get data
+    float pressure = pressureSensor.getLatestPressure();
+    float temperature = temperatureSensor.getTemperature();
+
+    // Solenoid valve
+    solenoidValve.off();
+
+    // Buzzer
+    buzzer.off();
+    
+    // LedSignal
+    ledSignal.showMonitoring();
+
+    // Display
+    display.printInfo(temperature, pressure);
+
+    // action
+    if (!isNormalPressure(pressure)) {
+        transitionTo(State::ALARM);
+    }
 }
 
 void RefillSystem::handleRefilling()
 {
-        // TODO
+    // get data
+    // Solenoid valve
+    // Buzzer
+    // LedSignal
+    // Display
+    display.printDebug("Refilling");
+    // action
 }
 
 void RefillSystem::handleAlarm()
 {
-        // TODO
+    // get data
+    // Solenoid valve
+    // Buzzer
+    // LedSignal
+    // Display
+    display.printDebug("Alarm");
+    // action
 }
 
 void RefillSystem::handleManual()
 {
-        // TODO
+    // get data
+    // Solenoid valve
+    // Buzzer
+    // LedSignal
+    // Display
+    display.printDebug("Manual");
+    // action
+}
+
+bool RefillSystem::isNormalPressure(float pressure)
+{
+    return pressure > MIN_PRESSURE && pressure < MAX_RESSURE;
+}
+
+bool RefillSystem::isHighPressue(float pressure)
+{
+    return pressure >= MAX_RESSURE;
+}
+
+bool RefillSystem::isLowPressure(float pressure)
+{
+    return pressure <= MIN_PRESSURE;
+}
+
+void RefillSystem::transitionTo(State newState)
+{
+    _currentState = newState;
 }
 
 void RefillSystem::pressureTask(void *pvParameters)

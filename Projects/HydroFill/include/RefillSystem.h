@@ -7,6 +7,9 @@
 #include <SolenoidValveManager.h>
 #include <BuzzerManager.h>
 
+#define MAX_RESSURE 2.5
+#define MIN_PRESSURE 1.5
+
 enum class State
 {
     INIT,
@@ -23,13 +26,20 @@ public:
     void begin();
     void update(); // use in loop
 private:
+    void handleInit();
     void handleMonitoring();
     void handleRefilling();
     void handleAlarm();
     void handleManual();
+
+    bool isNormalPressure(float pressure);
+    bool isHighPressue(float pressure);
+    bool isLowPressure(float pressure);
+    
+    void transitionTo(State newState);
+    
     static void pressureTask(void *pvParameters);
     static void temperatureTask(void *pvParameters);
-
 
     State _currentState = State::INIT;
 

@@ -8,16 +8,20 @@ void Display_1_77_TFT_Manager::begin()
     _display.initR(INITR_BLACKTAB);
     _display.setRotation(3);
     _display.fillScreen(ST77XX_BLACK);
-
-    _display.setCursor(10, 30);
-    _display.setTextColor(ST77XX_GREEN, ST77XX_BLACK);
-    _display.setTextSize(6);
-    _display.println("YTTY");
 }
 
 void Display_1_77_TFT_Manager::clean()
 {
     _display.fillScreen(ST77XX_BLACK);
+}
+
+void Display_1_77_TFT_Manager::printDemo()
+{
+    _display.setCursor(10, 30);
+    _display.setTextColor(ST77XX_GREEN, ST77XX_BLACK);
+    _display.setTextSize(6);
+    _display.println("YTTY");   
+    vTaskDelay(pdMS_TO_TICKS(2000));
 }
 
 void Display_1_77_TFT_Manager::printInfo(float temperature, float pressure)
@@ -65,6 +69,14 @@ void Display_1_77_TFT_Manager::printAlarm(String cause)
     _display.setTextSize(1);
     _display.setTextColor(ST77XX_WHITE);
     _display.println(cause);
+}
+
+void Display_1_77_TFT_Manager::printDebug(String msg)
+{
+    _display.setCursor(10, 50);
+    _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+    _display.setTextSize(2);
+    _display.println(msg);
 }
 
 void Display_1_77_TFT_Manager::drawWarning(int16_t x, int16_t y, int16_t size)

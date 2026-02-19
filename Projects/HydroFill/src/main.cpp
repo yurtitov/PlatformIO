@@ -37,7 +37,7 @@ void setup()
 void loop()
 {
   refillSistem.update();
-  
+
   // float pressure = pressureSensor.getLatestPressure();
 
   // float temperature = temperatureSensor.getTemperature();
@@ -46,12 +46,4 @@ void loop()
   // }
 
   // String time = timeService->getFormattedTime("%H:%M");
-
-  // digitalWrite(LED_ERROR_PIN, HIGH);
-
-  // digitalWrite(LED_POWER_ON_PIN, HIGH);
-  // digitalWrite(LED_SOLENOID_VALVE_OPEN_PIN, HIGH);
-
-  // display.printInfo(temperature, pressure);
-  
 }

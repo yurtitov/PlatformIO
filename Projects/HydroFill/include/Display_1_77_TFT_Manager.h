@@ -19,9 +19,11 @@ public:
     Display_1_77_TFT_Manager();
     void begin();
     void clean();
+    void printDemo();
     void printInfo(float temperature, float pressure);
     void printPumpingWater(int duration_millis, float pressure);
     void printAlarm(String cause);
+    void printDebug(String msg);
 private:
     Adafruit_ST7735 _display;
     void drawWarning(int16_t x, int16_t y, int16_t size);
