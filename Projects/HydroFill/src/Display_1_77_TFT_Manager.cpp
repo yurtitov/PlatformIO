@@ -6,7 +6,7 @@ Display_1_77_TFT_Manager::Display_1_77_TFT_Manager()
 void Display_1_77_TFT_Manager::begin()
 {
     _display.initR(INITR_BLACKTAB);
-    _display.setRotation(1);
+    _display.setRotation(3);
     _display.fillScreen(ST77XX_BLACK);
 
     _display.setCursor(10, 30);
