@@ -31,8 +31,8 @@ private:
     void handleManual();
 
     bool isNormalPressure(float pressure);
-    bool isHighPressue(float pressure);
-    bool isLowPressure(float pressure);
+    bool isPressureCriticallyHigh(float pressure);
+    bool isPressureCriticallyLow(float pressure);
     bool isNormalTemperature(float temperature);
     bool isAlarm(float pressure, float temperature);
 

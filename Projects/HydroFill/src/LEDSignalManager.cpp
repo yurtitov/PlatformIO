@@ -53,7 +53,8 @@ void LEDSignalManager::showMonitoring() {
 }
 
 void LEDSignalManager::showRefilling() {
-    offAll();
+    _ledGreen.off();
+    _ledRed.on();
     _ledBlue.on();
 }
 

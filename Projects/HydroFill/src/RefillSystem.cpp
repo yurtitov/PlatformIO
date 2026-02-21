@@ -104,12 +104,24 @@ void RefillSystem::handleMonitoring() {
 
 void RefillSystem::handleRefilling() {
     // get data
+    auto [pressure, temperature] = getSensorsData();
+
     // Solenoid valve
+    solenoidValve.off(); // TODO Add time range
+
     // Buzzer
+    // buzzer.on();
+
     // LedSignal
+    ledSignal.showRefilling();
+
     // Display
-    display.printDebug("Refilling");
+    display.printPumpingWater(pressure, !isNormalPressure(pressure));
+
     // action
+    if (isNormalPressure(pressure)) {
+        transitionTo(State::MONITORING);
+    }
 }
 
 void RefillSystem::handleAlarm() {
@@ -130,9 +142,14 @@ void RefillSystem::handleAlarm() {
                        !isNormalPressure(pressure));
 
     // action
+    if (isPressureCriticallyLow(pressure)) {
+        transitionTo(State::REFILLING);
+    }
+
     if (button.wasClicked()) {
         transitionTo(State::MANUAL);
     }
+
     if (!isAlarm(pressure, temperature)) {
         transitionTo(State::MONITORING);
     }
@@ -140,21 +157,27 @@ void RefillSystem::handleAlarm() {
 
 void RefillSystem::handleManual() {
     // get data
+    auto [pressure, temperature] = getSensorsData();
+
     // Solenoid valve
     // Buzzer
     // LedSignal
     // Display
     display.printDebug("Manual");
+    
     // action
+    if (isPressureCriticallyLow(pressure)) {
+        transitionTo(State::REFILLING);
+    }
 }
 
 bool RefillSystem::isNormalPressure(float pressure) {
     return pressure > ALARM_LOW_PRESSURE && pressure < ALARM_HIGH_PRESSURE;
 }
 
-bool RefillSystem::isHighPressue(float pressure) { return pressure >= MAX_RESSURE; }
+bool RefillSystem::isPressureCriticallyHigh(float pressure) { return pressure >= MAX_RESSURE; }
 
-bool RefillSystem::isLowPressure(float pressure) { return pressure <= MIN_PRESSURE; }
+bool RefillSystem::isPressureCriticallyLow(float pressure) { return pressure <= MIN_PRESSURE; }
 
 bool RefillSystem::isNormalTemperature(float temperature) {
     return temperature > ALARM_LOW_TEMPERATURE && temperature < ALARM_HIGH_TEMPERATURE;
@@ -190,5 +213,5 @@ void RefillSystem::temperatureTask(void* pvParameters) {
 std::tuple<float, float> RefillSystem::getSensorsData() {
     float pressure = pressureSensor.getLatestPressure();
     float temperature = temperatureSensor.getTemperature();
-    return {pressure, temperature};
+    return {1.19, 50};
 }

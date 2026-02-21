@@ -43,8 +43,25 @@ void Display_1_77_TFT_Manager::printInfo(float temperature, float pressure) {
     _display.println(" \367C");
 }
 
-void Display_1_77_TFT_Manager::printPumpingWater(int duration_millis, float pressure) {
-    // TODO
+void Display_1_77_TFT_Manager::printPumpingWater(float pressure, bool pressureAlarm) {
+    _display.setCursor(10, 15);
+    _display.setTextColor(ST77XX_BLUE, ST77XX_BLACK);
+    _display.setTextSize(2);
+    _display.println("Refilling...");
+
+    _display.setCursor(10, 60);
+    _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+    _display.setTextSize(1);
+    _display.print("p = ");
+    if (pressureAlarm) {
+        _display.setTextColor(ST77XX_RED, ST77XX_BLACK);
+    } else {
+        _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+    }
+    _display.setTextSize(2);
+    _display.print(pressure);
+    _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+    _display.println(" bar");
 }
 
 void Display_1_77_TFT_Manager::printAlarm(float temperature, float pressure, bool temperatureAlarm,

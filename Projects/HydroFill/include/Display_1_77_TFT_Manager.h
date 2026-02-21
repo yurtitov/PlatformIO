@@ -20,7 +20,7 @@ public:
     void clean();
     void printDemo();
     void printInfo(float temperature, float pressure);
-    void printPumpingWater(int duration_millis, float pressure);
+    void printPumpingWater(float pressure, bool pressureAlarm);
     void printAlarm(float temperature, float pressure, bool temperatureAlarm, bool pressureAlarm);
     void printDebug(String msg);
 
