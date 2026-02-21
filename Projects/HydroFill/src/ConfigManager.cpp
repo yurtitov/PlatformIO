@@ -1,16 +1,13 @@
 #include <ConfigManager.h>
 
-bool ConfigManager::load(ConfigData &config)
-{
-    if (!LittleFS.begin(true))
-    {
+bool ConfigManager::load(ConfigData& config) {
+    if (!LittleFS.begin(true)) {
         Serial.println("[Config] LittleFS Mount Failed");
         return false;
     }
 
     File file = LittleFS.open("/config.json", "r");
-    if (!file)
-    {
+    if (!file) {
         Serial.println("[Config] Failed to open file");
         return false;
     }
@@ -19,8 +16,7 @@ bool ConfigManager::load(ConfigData &config)
     DeserializationError error = deserializeJson(doc, file);
     file.close();
 
-    if (error)
-    {
+    if (error) {
         Serial.println("[Config] JSON Parse Failed");
         return false;
     }

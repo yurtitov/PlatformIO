@@ -1,31 +1,26 @@
 #include <Display_1_77_TFT_Manager.h>
 
 Display_1_77_TFT_Manager::Display_1_77_TFT_Manager()
-    : _display(DISPLAY_PIN_7_CS, DISPLAY_PIN_6_RS, DISPLAY_PIN_4_SDA, DISPLAY_PIN_3_SCK, DISPLAY_PIN_5_RES) {}
+    : _display(DISPLAY_PIN_7_CS, DISPLAY_PIN_6_RS, DISPLAY_PIN_4_SDA, DISPLAY_PIN_3_SCK,
+               DISPLAY_PIN_5_RES) {}
 
-void Display_1_77_TFT_Manager::begin()
-{
+void Display_1_77_TFT_Manager::begin() {
     _display.initR(INITR_BLACKTAB);
     _display.setRotation(3);
     _display.fillScreen(ST77XX_BLACK);
 }
 
-void Display_1_77_TFT_Manager::clean()
-{
-    _display.fillScreen(ST77XX_BLACK);
-}
+void Display_1_77_TFT_Manager::clean() { _display.fillScreen(ST77XX_BLACK); }
 
-void Display_1_77_TFT_Manager::printDemo()
-{
+void Display_1_77_TFT_Manager::printDemo() {
     _display.setCursor(10, 30);
     _display.setTextColor(ST77XX_GREEN, ST77XX_BLACK);
     _display.setTextSize(6);
-    _display.println("YTTY");   
+    _display.println("YTTY");
     vTaskDelay(pdMS_TO_TICKS(2000));
 }
 
-void Display_1_77_TFT_Manager::printInfo(float temperature, float pressure)
-{
+void Display_1_77_TFT_Manager::printInfo(float temperature, float pressure) {
     _display.setCursor(10, 15);
     _display.setTextColor(ST77XX_GREEN, ST77XX_BLACK);
     _display.setTextSize(3);
@@ -48,46 +43,61 @@ void Display_1_77_TFT_Manager::printInfo(float temperature, float pressure)
     _display.println(" \367C");
 }
 
-void Display_1_77_TFT_Manager::printPumpingWater(int duration_millis, float pressure)
-{
+void Display_1_77_TFT_Manager::printPumpingWater(int duration_millis, float pressure) {
     // TODO
 }
 
-void Display_1_77_TFT_Manager::printAlarm(String cause)
-{
-    _display.fillScreen(ST7735_BLACK);
+void Display_1_77_TFT_Manager::printAlarm(float temperature, float pressure, bool temperatureAlarm,
+                                          bool pressureAlarm) {
+    _display.setCursor(10, 15);
+    _display.setTextColor(ST77XX_RED, ST77XX_BLACK);
+    _display.setTextSize(3);
+    _display.println("Alarm");
+    drawWarning(130, 15, 20);
 
-    // Рисуем треугольник в центре верхней части (x=80 для экрана 160px)
-    drawWarning(80, 10, 20);
-
-    _display.setCursor(10, 50);
-    _display.setTextColor(ST77XX_RED);
-    _display.setTextSize(2);
-    _display.println("ALARM!");
-
-    _display.setCursor(10, 80);
+    _display.setCursor(10, 60);
+    _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
     _display.setTextSize(1);
-    _display.setTextColor(ST77XX_WHITE);
-    _display.println(cause);
+    _display.print("p = ");
+    if (pressureAlarm) {
+        _display.setTextColor(ST77XX_RED, ST77XX_BLACK);
+    } else {
+        _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+    }
+    _display.setTextSize(2);
+    _display.print(pressure);
+    _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+    _display.println(" bar");
+
+    _display.setCursor(10, 90);
+    _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+    _display.setTextSize(1);
+    _display.print("t = ");
+    if (temperatureAlarm) {
+        _display.setTextColor(ST77XX_RED, ST77XX_BLACK);
+    } else {
+        _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+    }
+    _display.setTextSize(2);
+    _display.print(temperature);
+    _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+    _display.println(" \367C");
 }
 
-void Display_1_77_TFT_Manager::printDebug(String msg)
-{
+void Display_1_77_TFT_Manager::printDebug(String msg) {
     _display.setCursor(10, 50);
     _display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
     _display.setTextSize(2);
     _display.println(msg);
 }
 
-void Display_1_77_TFT_Manager::drawWarning(int16_t x, int16_t y, int16_t size)
-{
+void Display_1_77_TFT_Manager::drawWarning(int16_t x, int16_t y, int16_t size) {
     // 1. Рисуем красный треугольник
     // x, y — координаты верхней вершины
-    _display.fillTriangle(
-        x, y,               // Верх
-        x - size, y + size, // Лево-низ
-        x + size, y + size, // Право-низ
-        ST77XX_RED);
+    _display.fillTriangle(x, y - 5,                      // Верх
+                          x - size / 1.4, y + size + 2,  // Лево-низ
+                          x + size / 1.4, y + size + 2,  // Право-низ
+                          ST77XX_RED);
 
     // 2. Рисуем восклицательный знак (белым цветом)
     // Линия (верхняя часть знака)

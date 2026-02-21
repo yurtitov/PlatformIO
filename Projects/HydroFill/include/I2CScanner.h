@@ -1,10 +1,10 @@
 #pragma once
 #include <Arduino.h>
 #include <Wire.h>
+
 #include <vector>
 
-class I2CScanner
-{
+class I2CScanner {
 public:
     // Сканирует шину и выводит результат в Serial
     static void scanAndPrint();

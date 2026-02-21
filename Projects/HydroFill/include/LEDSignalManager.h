@@ -6,20 +6,19 @@
 #define LED_GREEN_PIN 40
 #define LED_BLUE_PIN 38
 
-class LED
-{
+class LED {
 public:
     LED(int pin);
     void begin();
     void on();
     void off();
     void toggle();
+
 private:
     int _pin;
 };
 
-class LEDSignalManager  
-{
+class LEDSignalManager {
 public:
     LEDSignalManager();
     void begin();
@@ -27,6 +26,7 @@ public:
     void showMonitoring();
     void showRefilling();
     void showAlarm();
+
 private:
     LED _ledGreen;
     LED _ledRed;

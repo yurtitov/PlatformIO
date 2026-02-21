@@ -1,18 +1,18 @@
 #pragma once
 
-#include <OneWire.h>
 #include <DallasTemperature.h>
+#include <OneWire.h>
 
 #define TEMPERATURE_SENSOR_DATA_PIN 4
 
-class TemperatureSensor
-{
+class TemperatureSensor {
 public:
     TemperatureSensor();
     void begin();
     void update();
     float getTemperature();
     bool isSensorConnected();
+
 private:
     DallasTemperature _sensor;
     OneWire _oneWire;

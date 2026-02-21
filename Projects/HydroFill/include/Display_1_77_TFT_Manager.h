@@ -13,8 +13,7 @@
 #define DISPLAY_PIN_7_CS 5
 // DISPLAY_PIN_8_LEDA
 
-class Display_1_77_TFT_Manager
-{
+class Display_1_77_TFT_Manager {
 public:
     Display_1_77_TFT_Manager();
     void begin();
@@ -22,8 +21,9 @@ public:
     void printDemo();
     void printInfo(float temperature, float pressure);
     void printPumpingWater(int duration_millis, float pressure);
-    void printAlarm(String cause);
+    void printAlarm(float temperature, float pressure, bool temperatureAlarm, bool pressureAlarm);
     void printDebug(String msg);
+
 private:
     Adafruit_ST7735 _display;
     void drawWarning(int16_t x, int16_t y, int16_t size);

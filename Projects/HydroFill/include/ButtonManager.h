@@ -4,13 +4,15 @@
 
 #define BUTTON_PIN 21
 
-class ButtonManager
-{
+class ButtonManager {
 public:
     ButtonManager(uint32_t debounce_ms);
     void begin();
-    bool isPressed(); // Возвращает текущее состояние (true - нажата)
-    bool wasClicked(); // Возвращает true только в момент нажатия (одиночный клик)
+    // Возвращает текущее состояние (true - нажата)
+    bool isPressed();
+    // Возвращает true только в момент нажатия (одиночный клик)
+    bool wasClicked();
+
 private:
     uint8_t _pin;
     uint32_t _debounce_ms;

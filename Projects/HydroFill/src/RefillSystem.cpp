@@ -1,37 +1,26 @@
 #include "RefillSystem.h"
 
 RefillSystem::RefillSystem()
-    : 
-    pressureSensor(),
-    ledSignal(),
-    display(),
-    temperatureSensor(),
-    solenoidValve(),
-    buzzer(),
-    button(50)
-    {}
+    : pressureSensor(),
+      ledSignal(),
+      display(),
+      temperatureSensor(),
+      solenoidValve(),
+      buzzer(),
+      button(50) {}
 
-void RefillSystem::begin()
-{
+void RefillSystem::begin() {
     pressureSensor.begin();
-    xTaskCreate(
-        pressureTask,   // Функция задачи
-        "PressureTask", // Имя задачи
-        4096,           // Размер стека
-        this,           // Параметры
-        1,              // Приоритет
-        NULL            // Хендл задачи
+    xTaskCreate(pressureTask,    // Функция задачи
+                "PressureTask",  // Имя задачи
+                4096,            // Размер стека
+                this,            // Параметры
+                1,               // Приоритет
+                NULL             // Хендл задачи
     );
 
     temperatureSensor.begin();
-    xTaskCreate(
-        temperatureTask,
-        "TemperatureTask",
-        4096,
-        this,
-        1,
-        NULL
-    );
+    xTaskCreate(temperatureTask, "TemperatureTask", 4096, this, 1, NULL);
 
     display.begin();
     ledSignal.begin();
@@ -40,8 +29,7 @@ void RefillSystem::begin()
     button.begin();
 }
 
-void RefillSystem::update()
-{
+void RefillSystem::update() {
     unsigned long now = millis();
 
     switch (_currentState) {
@@ -64,19 +52,17 @@ void RefillSystem::update()
             break;
     }
 }
-    
-void RefillSystem::handleInit()
-{
+
+void RefillSystem::handleInit() {
     // get data
-    float pressure = pressureSensor.getLatestPressure();
-    float temperature = temperatureSensor.getTemperature();
+    auto [pressure, temperature] = getSensorsData();
 
     // Solenoid valve
     solenoidValve.off();
 
     // Buzzer
     buzzer.off();
-    
+
     // LedSignal
     ledSignal.showDemo();
 
@@ -85,25 +71,25 @@ void RefillSystem::handleInit()
     display.clean();
 
     // action
-    if (isNormalPressure(pressure)) {
+    if (!isAlarm(pressure, temperature)) {
         transitionTo(State::MONITORING);
+        Serial.println(1);
     } else {
         transitionTo(State::ALARM);
+        Serial.println(2);
     }
 }
 
-void RefillSystem::handleMonitoring()
-{
+void RefillSystem::handleMonitoring() {
     // get data
-    float pressure = pressureSensor.getLatestPressure();
-    float temperature = temperatureSensor.getTemperature();
+    auto [pressure, temperature] = getSensorsData();
 
     // Solenoid valve
     solenoidValve.off();
 
     // Buzzer
     buzzer.off();
-    
+
     // LedSignal
     ledSignal.showMonitoring();
 
@@ -111,13 +97,12 @@ void RefillSystem::handleMonitoring()
     display.printInfo(temperature, pressure);
 
     // action
-    if (!isNormalPressure(pressure)) {
+    if (isAlarm(pressure, temperature)) {
         transitionTo(State::ALARM);
     }
 }
 
-void RefillSystem::handleRefilling()
-{
+void RefillSystem::handleRefilling() {
     // get data
     // Solenoid valve
     // Buzzer
@@ -127,19 +112,33 @@ void RefillSystem::handleRefilling()
     // action
 }
 
-void RefillSystem::handleAlarm()
-{
+void RefillSystem::handleAlarm() {
     // get data
+    auto [pressure, temperature] = getSensorsData();
+
     // Solenoid valve
+    solenoidValve.off();
+
     // Buzzer
+    buzzer.off();
+
     // LedSignal
+    ledSignal.showAlarm();
+
     // Display
-    display.printDebug("Alarm");
+    display.printAlarm(temperature, pressure, !isNormalTemperature(temperature),
+                       !isNormalPressure(pressure));
+
     // action
+    if (button.wasClicked()) {
+        transitionTo(State::MANUAL);
+    }
+    if (!isAlarm(pressure, temperature)) {
+        transitionTo(State::MONITORING);
+    }
 }
 
-void RefillSystem::handleManual()
-{
+void RefillSystem::handleManual() {
     // get data
     // Solenoid valve
     // Buzzer
@@ -149,44 +148,47 @@ void RefillSystem::handleManual()
     // action
 }
 
-bool RefillSystem::isNormalPressure(float pressure)
-{
-    return pressure > MIN_PRESSURE && pressure < MAX_RESSURE;
+bool RefillSystem::isNormalPressure(float pressure) {
+    return pressure > ALARM_LOW_PRESSURE && pressure < ALARM_HIGH_PRESSURE;
 }
 
-bool RefillSystem::isHighPressue(float pressure)
-{
-    return pressure >= MAX_RESSURE;
+bool RefillSystem::isHighPressue(float pressure) { return pressure >= MAX_RESSURE; }
+
+bool RefillSystem::isLowPressure(float pressure) { return pressure <= MIN_PRESSURE; }
+
+bool RefillSystem::isNormalTemperature(float temperature) {
+    return temperature > ALARM_LOW_TEMPERATURE && temperature < ALARM_HIGH_TEMPERATURE;
 }
 
-bool RefillSystem::isLowPressure(float pressure)
-{
-    return pressure <= MIN_PRESSURE;
+bool RefillSystem::isAlarm(float pressure, float temperature) {
+    return !isNormalPressure(pressure) || !isNormalTemperature(temperature);
 }
 
-void RefillSystem::transitionTo(State newState)
-{
+void RefillSystem::transitionTo(State newState) {
     _currentState = newState;
+    display.clean();
 }
 
-void RefillSystem::pressureTask(void *pvParameters)
-{
+void RefillSystem::pressureTask(void* pvParameters) {
     RefillSystem* system = static_cast<RefillSystem*>(pvParameters);
 
-    while (true)
-    {
+    while (true) {
         system->pressureSensor.update();  // Опрашиваем датчик (это занимает ~750мс из-за delay)
         vTaskDelay(pdMS_TO_TICKS(100));   // Небольшая пауза между циклами опроса
     }
 }
 
-
-void RefillSystem::temperatureTask(void *pvParameters)
-{
+void RefillSystem::temperatureTask(void* pvParameters) {
     RefillSystem* system = static_cast<RefillSystem*>(pvParameters);
-    while ( true)
-    {
+    while (true) {
         system->temperatureSensor.update();
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
+}
+
+// Return pressure, temperature tuple
+std::tuple<float, float> RefillSystem::getSensorsData() {
+    float pressure = pressureSensor.getLatestPressure();
+    float temperature = temperatureSensor.getTemperature();
+    return {pressure, temperature};
 }
