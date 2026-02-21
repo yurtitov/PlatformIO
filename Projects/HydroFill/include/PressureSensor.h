@@ -1,5 +1,6 @@
 #pragma once
 #include <Wire.h>
+#include <atomic>
 
 #define PRESSURE_SENSOR_ADDR 0x78
 #define I2C_SDA 8
@@ -22,7 +23,7 @@ private:
     float _alpha;  // Коэффициент фильтрации (0.1 - сильно сглажено, 0.9 - почти
                    // без фильтра)
 
-    volatile float _filteredPressure = -1.0f;  // -1 для инициализации первым замером
+    std::atomic<float> _filteredPressure{-1.0f};
 
     const float MAX_BAR = 10.0;
     const int RAW_ZERO = 6595;

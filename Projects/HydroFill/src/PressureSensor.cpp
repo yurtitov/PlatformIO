@@ -10,7 +10,7 @@ void PressureSensor::update() {
     Wire.beginTransmission(_addr);
     Wire.write(0xAC);
     Wire.endTransmission();
-    delay(75);
+    vTaskDelay(pdMS_TO_TICKS(75));
 
     Wire.requestFrom(_addr, (uint8_t)3);
     if (Wire.available() == 3) {
