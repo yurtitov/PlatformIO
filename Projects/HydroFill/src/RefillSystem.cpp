@@ -7,7 +7,8 @@ RefillSystem::RefillSystem()
     display(),
     temperatureSensor(),
     solenoidValve(),
-    buzzer()
+    buzzer(),
+    button(50)
     {}
 
 void RefillSystem::begin()
@@ -36,6 +37,7 @@ void RefillSystem::begin()
     ledSignal.begin();
     solenoidValve.begin();
     buzzer.begin();
+    button.begin();
 }
 
 void RefillSystem::update()

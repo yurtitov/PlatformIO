@@ -6,6 +6,7 @@
 #include <LEDSignalManager.h>
 #include <SolenoidValveManager.h>
 #include <BuzzerManager.h>
+#include <ButtonManager.h>
 
 #define MAX_RESSURE 2.5
 #define MIN_PRESSURE 1.5
@@ -49,4 +50,5 @@ private:
     TemperatureSensor temperatureSensor;
     SolenoidValveManager solenoidValve;
     BuzzerManager buzzer;
+    ButtonManager button;
 };
